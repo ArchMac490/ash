@@ -15,7 +15,7 @@ extern char **environ;
 void prompt(void);
 
 // INPUT/PROCESSING
-void process_input(void);
+char **process_input(void);
 
 // EXECUTING
 void execute(char **argv);
