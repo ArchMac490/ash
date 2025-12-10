@@ -20,12 +20,13 @@ void process_input(void) {
   char **argv = NULL;
   char *token = NULL;
 
-  token = strtok(buff, " \t\n");
+  // TODO: Scan for how many elements then allocate instead of using realloc
   size_t argv_len = 1;
-
+  token = strtok(buff, " \t\n");
   while (token != NULL) {
     argv = realloc(argv, (argv_len + 1) * sizeof(char *));
     argv[argv_len++ - 1] = strdup(token);
+
     token = strtok(NULL, " \t\n");
   }
 
@@ -42,7 +43,7 @@ void process_input(void) {
   // Free all strings in argv, then argv
   size_t i = 0;
   while (argv[i] != NULL) {
-    free(argv[i]);
+    free(argv[i++]);
   }
   free(argv);
 }
