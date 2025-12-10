@@ -1,2 +1,4 @@
 *.o
 ash
+compile_commands.json
+.cache

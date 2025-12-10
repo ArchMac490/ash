@@ -1,26 +1,53 @@
 #include "ash.h"
 
-void reset_values(char *command, char *parameters) {
-	memset(command, MAX_INPUT_LENGTH, MAX_INPUT_LENGTH);
-  parameters = NULL;
+void prompt(void) { printf("\n> "); }
+
+void process_input(void) {
+  // Declare buffers
+  char *buff = NULL;
+  size_t buff_size = 0;
+
+  // Read input
+  ssize_t len = getline(&buff, &buff_size, stdin);
+
+  // FIX: Fix this, won't cancel program operation
+  if (len == EOF) {
+    free(buff);
+    return;
+  }
+
+  // Create an array of whitespace delimited, NULL terminated strings
+  char **argv = NULL;
+  char *token = NULL;
+
+  token = strtok(buff, " \t\n");
+  size_t argv_len = 1;
+
+  while (token != NULL) {
+    argv = realloc(argv, (argv_len + 1) * sizeof(char *));
+    argv[argv_len++ - 1] = strdup(token);
+    token = strtok(NULL, " \t\n");
+  }
+
+  // Append a NULL to the array
+  argv = realloc(argv, (argv_len + 1) * sizeof(char *));
+  argv[argv_len] = NULL;
+
+  // Free the original buffer
+  free(buff); // TODO: Check if this causes a memory leak
+
+  // Execute
+  execute(argv);
+
+  // Free all strings in argv, then argv
+  size_t i = 0;
+  while (argv[i] != NULL) {
+    free(argv[i]);
+  }
+  free(argv);
 }
 
-void prompt(void) {
-	printf("\n> ");
-}
-
-void read_input(char *command) {
-  fgets(command, MAX_INPUT_LENGTH, stdin);
-}
-
-// TODO: Potential issues with whitespace?
-// TODO: Potential issues with overflows?
-void process_input(char **command, char **parameters) {
-  *command = strtok(*command, " \n"); 
-  *parameters = strtok(NULL, "\n");
-}
-
-void execute(char **command, char **parameters) {
+void execute(char **argv) {
   int status = 0;
 
   if (fork() != 0) { // Parent Process
@@ -28,6 +55,6 @@ void execute(char **command, char **parameters) {
   } else { // Child Process
     // TODO: Error checking
     // TODO: Environment variables
-    execve(*command, parameters, environ);
+    execve(argv[0], argv, environ);
   }
 }
